@@ -48,7 +48,7 @@ public:
     virtual ~Operand
         (
         )
-        = 0;
+        = 0; // abstract class so Operand may not be instantiated, subclasses MUST implement this function
 
     Operand& operator=
         (

@@ -8,7 +8,7 @@
 // CSE220 Programming for Computer Engineering, Fall 2011
 //
 // AUTHOR INFORMATION
-// Kevin R. Burger [KRB]
+// Kevin R. Burger [KRB]4j
 //   
 // Mailing Address:
 // Computer Science & Engineering
@@ -27,13 +27,53 @@
 #define __INSTRTYPERV_HPP__
 
 #include <string>
-#include "Integer.hpp"
 #include "InstrTypeR.hpp"
 #include "Variable.hpp"
 
 //--------------------------------------------------------------------------------------------------------------
 // This class is very similar to the InstrTypeRI class. Look at it for hints about how to implement this class.
 //--------------------------------------------------------------------------------------------------------------
-???
+//==============================================================================================================
+// CLASS: InstrTypeRV
+//==============================================================================================================
+class InstrTypeRV : public InstrTypeR {
+public:
+    InstrTypeRV
+        (
+        std::string const& pMnemonic,
+        Register const&    pRegister,
+        Variable const&     pVariable
+        );
 
+    InstrTypeRV
+        (
+        InstrTypeRV const& pInstr
+        );
+
+    virtual ~InstrTypeRV
+        (
+        );
+
+    InstrTypeRV& operator=
+        (
+        InstrTypeRV const& pInstr
+        );
+
+    virtual void Encode
+        (
+        );
+
+    Variable const& GetVariable
+        (
+        )
+        const;
+
+protected:
+    InstrTypeRV& Copy
+        (
+        InstrTypeRV const& pInstr
+        );
+
+    Variable mVariable;
+};
 #endif

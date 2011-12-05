@@ -61,14 +61,18 @@ void TextSegment::AddInstr
     Instr *pInstr
     )
 {
-    ???
+	pInstr->Encode();
+	mInstrs.Append(*pInstr);
 }
 
 //--------------------------------------------------------------------------------------------------------------
 // AddLabel(). Adds a new label pLabel to the mLabels dictionary. The key is pLabel.GetName() and the value
 // is pLabel. Hint: look at DataSegment::AddVariable().
 //--------------------------------------------------------------------------------------------------------------
-???
+void TextSegment::AddLabel(Label const& pLabel)
+{
+    mLabels.Add(pLabel.GetName(), pLabel);
+}
 
 #ifdef DEBUG
 void TextSegment::Dump
@@ -108,7 +112,11 @@ void TextSegment::Dump
 // End While
 // Return contents
 //--------------------------------------------------------------------------------------------------------------
-???
+//TODO TextSegment::GetContents()
+
+Byte *TextSegment::GetContents(){
+
+}
 
 Label TextSegment::GetLabel
     (
@@ -128,7 +136,9 @@ Label TextSegment::GetLabel
 //
 // Hint: See DataSegment::GetSize().
 //--------------------------------------------------------------------------------------------------------------
-???
+UInt32 TextSegment::GetSize() const{
+	return (1 + 4 + 4 + (4 * mInstrs.GetSize()) );
+}
 
 //==============================================================================================================
 // PROTECTED FUNCTIONS

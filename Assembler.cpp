@@ -23,6 +23,7 @@
 // -------------------------------------------------------------------------------------------------------------
 // 21 Nov 2011 [KRB] Initial revision.
 //**************************************************************************************************************
+
 #ifdef DEBUG
     #include <iostream>
 #endif
@@ -113,12 +114,46 @@ Int Assembler::Run
 //     Else mTextSeg.Dump()
 // #Endif
 //--------------------------------------------------------------------------------------------------------------
-void Assembler::Assemble
-    (
-    UInt const pPass
-    )
-{
-    ???
+void Assembler::Assemble(UInt const pPass){
+#ifdef DEBUG
+	std::cout << "Pass: " << pPass << std::endl;
+#endif
+	this->mCurrAddr = 0;
+	std::string token = mLex.NextToken();
+	Instr *instr;
+	while(token != ""){
+		if(token[0] == '.'){// this is a Directive
+			if(pPass == 1) AssembleDirective(token);
+			else mLex.SkipRestOfLine();
+
+		}else if (token[0] == '$'){// this is a Variable
+			if(pPass == 1) AssembleVariable(token);
+			else mLex.SkipRestOfLine();
+
+		}else if (token[0] == '@'){// this is a label
+			if(pPass == 1) {
+				AssembleLabel(token);
+				mLex.SkipRestOfLine();
+			}
+			else{
+				instr = AssembleInstr(mLex.NextToken(), token);
+				mTextSeg.AddInstr(instr);
+			}
+			mCurrAddr++;
+		}else {// this is an instruction
+			if(pPass == 1) mLex.SkipRestOfLine();
+			else {
+				instr = AssembleInstr(mLex.NextToken(), token);
+				mTextSeg.AddInstr(instr);
+			}
+			mCurrAddr++;
+		}
+		token = mLex.NextToken();
+	}
+#ifdef DEBUG
+	if(pPass == 1) { mDataSeg.Dump(); }
+	else {mTextSeg.Dump();}
+#endif
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -133,12 +168,12 @@ void Assembler::Assemble
 // Else mTextSeg.SetAddress(address)
 // mCurrAddr <- address
 //--------------------------------------------------------------------------------------------------------------
-void Assembler::AssembleDirective
-    (
-    std::string const& pDirective
-    )
+void Assembler::AssembleDirective(std::string const& pDirective)
 {
-    ???
+	Address address = atoi(mLex.NextToken().c_str());
+	if(pDirective == ".DATA") mDataSeg.SetAddress(address);
+	else mTextSeg.SetAddress(address);
+	mCurrAddr = address;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -161,13 +196,24 @@ void Assembler::AssembleDirective
 //     return AssembleInstrTypeRV(pMnemonic, pLabel)
 // End If
 //--------------------------------------------------------------------------------------------------------------
-Instr *Assembler::AssembleInstr
-    (
+Instr *Assembler::AssembleInstr(
     std::string const& pMnemonic,
     std::string const& pLabel
     )
 {
-    ???
+	if( IsTypeR(pMnemonic) ){ // in [ADD, NEG, NOR, POP, PUSH, ROL]
+		return AssembleInstrTypeR(pMnemonic, pLabel);
+	}else if ( IsTypeB(pMnemonic) ){ // in [BEQ, BLT, BR, BSUB]
+		return AssembleInstrTypeB(pMnemonic, pLabel);
+	}else if ( IsTypeN(pMnemonic) ){ // in [HALT, RET]
+		return AssembleInstrTypeN(pMnemonic, pLabel);
+	}else if ( IsTypeRI(pMnemonic) ){ // [IN, OUT, LDI]
+		return AssembleInstrTypeRI(pMnemonic, pLabel);
+	}else if ( IsTypeRV(pMnemonic) ){// [LD, LDA, ST]
+		return AssembleInstrTypeRV(pMnemonic, pLabel);
+	}else {// this is an error condition caused by an unrecognized mnemonic
+		return NULL;// throw an error here??
+	}// end if
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -186,7 +232,9 @@ Instr *Assembler::AssembleInstrTypeB
     std::string const& pLabel
     )
 {
-    ???
+	std::string temp = mLex.NextToken();
+	Label targetLabel = mTextSeg.GetLabel(temp);
+	return( new InstrTypeB(pMnemonic, targetLabel));
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -204,7 +252,7 @@ Instr *Assembler::AssembleInstrTypeN
     std::string const& pLabel
     )
 {
-    ???
+	return( new Instr(pMnemonic));
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -223,7 +271,8 @@ Instr *Assembler::AssembleInstrTypeR
     std::string const& pLabel
     )
 {
-    ???
+	Register reg(mLex.NextToken() );
+	return ( new InstrTypeR(pMnemonic, reg) );
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -243,7 +292,9 @@ Instr *Assembler::AssembleInstrTypeRI
     std::string const& pLabel
     )
 {
-    ???
+	Register reg(mLex.NextToken());
+	Integer i(mLex.NextToken());
+	return (new InstrTypeRI(pMnemonic, reg, i));
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -269,7 +320,17 @@ Instr *Assembler::AssembleInstrTypeRV
     std::string const& pLabel
     )
 {
-    ???
+	std::string reg_string, var_string;
+	if( IsLoad(pMnemonic) ){ // reg comes before var in LDX instr
+		reg_string = mLex.NextToken();
+		var_string = mLex.NextToken();
+	}else{// var comes before reg in ST instr
+		var_string = mLex.NextToken();
+		reg_string = mLex.NextToken();
+	}
+	Variable var = mDataSeg.GetVariable(var_string);
+
+	return (new InstrTypeRV(pMnemonic, Register(reg_string), var));
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -308,7 +369,9 @@ void Assembler::AssembleVariable
     std::string const& pName
     )
 {
-    ???
+	int initValue = atoi(mLex.NextToken().c_str());
+	Variable newVariable(pName, mCurrAddr, initValue);
+	mDataSeg.AddVariable(newVariable);
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -325,10 +388,109 @@ void Assembler::WriteBinary
     (
     )
 {
-    ???
+	// todo  Assembler::WriteBinary
 }
 
 //==============================================================================================================
 // PRIVATE FUNCTIONS
 //==============================================================================================================
 
+//--------------------------------------------------------------------------------------------------------------
+// FUNCTION: Assembler::IsTypeR
+// DESCR: Checks if pMnemonic is a member of [ADD, NEG, NOR, POP, PUSH, ROL]
+//--------------------------------------------------------------------------------------------------------------
+Bool Assembler::IsTypeR(std::string pMnemonic){
+	Bool return_flag = false;
+	if(pMnemonic=="ADD"){
+		return_flag = true;
+	}else if(pMnemonic=="NEG"){
+		return_flag = true;
+	}else if(pMnemonic=="NOR"){
+		return_flag = true;
+	}else if(pMnemonic=="POP"){
+		return_flag = true;
+	}else if(pMnemonic=="PUSH"){
+		return_flag = true;
+	}else if(pMnemonic=="ROL"){
+		return_flag = true;
+	}
+	return return_flag;
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// FUNCTION: Assembler::IsTypeB
+// DESCR: Checks if pMnemonic is a member of [BEQ, BLT, BR, BSUB]
+//--------------------------------------------------------------------------------------------------------------
+Bool Assembler::IsTypeB(std::string pMnemonic){
+	Bool return_flag = false;
+	if(pMnemonic=="BEQ"){
+		return_flag = true;
+	}else if(pMnemonic=="BLT"){
+		return_flag = true;
+	}else if(pMnemonic=="BR"){
+		return_flag = true;
+	}else if(pMnemonic=="BSUB"){
+		return_flag = true;
+	}
+	return return_flag;
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// FUNCTION: Assembler::IsTypeN
+// DESCR: Checks if pMnemonic is a member of [HALT, RET]
+//--------------------------------------------------------------------------------------------------------------
+Bool Assembler::IsTypeN(std::string pMnemonic){
+	Bool return_flag = false;
+	if(pMnemonic=="HALT"){
+		return_flag = true;
+	}else if(pMnemonic=="RET"){
+		return_flag = true;
+	}
+	return return_flag;
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// FUNCTION: Assembler::IsTypeRI
+// DESCR: Checks if pMnemonic is a member of [IN, OUT, LDI]
+//--------------------------------------------------------------------------------------------------------------
+Bool Assembler::IsTypeRI(std::string pMnemonic){
+	Bool return_flag = false;
+	if(pMnemonic=="IN"){
+		return_flag = true;
+	}else if(pMnemonic=="OUT"){
+		return_flag = true;
+	}else if(pMnemonic=="LDI"){
+		return_flag = true;
+	}
+	return return_flag;
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// FUNCTION: Assembler::IsTypeRV
+// DESCR: Checks if pMnemonic is a member of [LD, LDA, ST]
+//--------------------------------------------------------------------------------------------------------------
+Bool Assembler::IsTypeRV(std::string pMnemonic){
+	Bool return_flag = false;
+	if(pMnemonic=="LD"){
+		return_flag = true;
+	}else if(pMnemonic=="LDA"){
+		return_flag = true;
+	}else if(pMnemonic=="ST"){
+		return_flag = true;
+	}
+	return return_flag;
+}
+
+//--------------------------------------------------------------------------------------------------------------
+// FUNCTION: Assembler::IsLoad
+// DESCR: Checks if pMnemonic is a member of [LD, LDA]
+//--------------------------------------------------------------------------------------------------------------
+Bool Assembler::IsLoad(std::string pMnemonic){
+	Bool return_flag = false;
+	if(pMnemonic=="LD"){
+		return_flag = true;
+	}else if(pMnemonic=="LDA"){
+		return_flag = true;
+	}
+	return return_flag;
+}

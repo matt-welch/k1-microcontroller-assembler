@@ -59,15 +59,34 @@ Lex::~Lex
 // While comment is true
 // Return token
 //--------------------------------------------------------------------------------------------------------------
-???
+
+std::string Lex::NextToken(){
+	Bool comment;
+	std::string token;
+	do{
+		mFin >> token; // reads next token from the file
+		if(!mFin){return "";}// true if stream has not failed, false if fail
+		comment = false;
+		if(token[0] == ';'){// Lex just read a comment, throw it away
+			SkipRestOfLine();
+			comment = true;
+		}
+	}while(comment); // if comment found, keep parsing
+	return token;
+}
 
 //--------------------------------------------------------------------------------------------------------------
 // Reset(). Closes the source code file and then reopens it.
 // Pseudocode:
 // Close the file.
 // Open the file again.
+//
+// alternatively, can seek back to beginning of the file
 //--------------------------------------------------------------------------------------------------------------
-???
+void Lex::Reset(){// this may not work on cygwin
+	mFin.close();
+	mFin.open(mSrcFname.c_str());
+}
 
 //--------------------------------------------------------------------------------------------------------------
 // SkipRestOfLine(). Reads and discards all characters until '\n' is read.
@@ -75,7 +94,11 @@ Lex::~Lex
 // Define ignore as a string.
 // Call getline(mFine, ignore, '\n').
 //--------------------------------------------------------------------------------------------------------------
-???
+
+void Lex::SkipRestOfLine(){
+	std::string ignore;
+	getline(mFin, ignore); // reads until newline char
+}
 
 //==============================================================================================================
 // PROTECTED FUNCTIONS

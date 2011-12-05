@@ -11,7 +11,9 @@
 # -g         : Put debugging information in the .o file. Used by the GDB debugger.
 # -O0        : Turn off all optimization. Necessary if you are going to debug using GDB.
 # -Wall      : Turn on all warnings. Your code should compile with no errors or warnings.
-CPPFLAGS  = -c -D_32_BIT_ -DDEBUG -g -O0 -Wall
+# -pedantic  : Issue all the warnings demanded by strict ISO C and ISO C ++
+CPPFLAGS  = -c -D_32_BIT_ -DDEBUG -g -O0 -Wall -pedantic
+#CPPFLAGS  = -c -D_32_BIT_ -DDEBUG -g -O0
 
 SOURCES = ArgException.cpp   \
           Args.cpp           \
