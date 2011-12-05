@@ -4,4 +4,7 @@ syntax: glob
 *.bz2
 *~
 *Debug*
+.cproject
+.project
+NOTES.txt
 
