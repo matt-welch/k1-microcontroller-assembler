@@ -92,13 +92,13 @@ protected:
 private:
     // Declare a data member named mInstrs which is an object of the templated class Vector<Instr>.
     //----------------------------------------------------------------------------------------------------------
-    ???
+    Vector<Instr> mInstrs;
 
     //----------------------------------------------------------------------------------------------------------
     // Declare a data member named mLabels which is an object of the templated class Dictionary<std::string,
     // Label>.
     //----------------------------------------------------------------------------------------------------------
-    ???
+    Dictionary<std::string,Label> mLabels;
 };
 
 #endif

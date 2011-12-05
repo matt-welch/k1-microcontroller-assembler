@@ -117,6 +117,13 @@ protected:
         );
 
 private:
+    Bool IsTypeR(std::string pMnemonic);
+    Bool IsTypeB(std::string pMnemonic);
+    Bool IsTypeN(std::string pMnemonic);
+    Bool IsTypeRI(std::string pMnemonic);
+    Bool IsTypeRV(std::string pMnemonic);
+    Bool IsLoad(std::string pMnemonic);
+
     std::string mBinFname;
     UInt32      mCurrAddr;
     DataSegment mDataSeg;
