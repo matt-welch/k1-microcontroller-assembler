@@ -105,6 +105,8 @@ Int Assembler::Run
 //     Else  -- Instruction
 //         If pPass is 1 Then mLex.SkipRestOfLine()
 //         Else instr <- AssembleInstruction(mLex.NextToken(), token); mTextSeg.AddInstr(instr)
+//         Else instr <- AssembleInstruction(token, ""); mTextSeg.AddInstr(instr)
+
 //         mCurrAddr++;
 //     End If
 //     token <- mLex.NextToken()
@@ -118,19 +120,30 @@ void Assembler::Assemble(UInt const pPass){
 #ifdef DEBUG
 	std::cout << "Pass: " << pPass << std::endl;
 #endif
-	this->mCurrAddr = 0;
+	mCurrAddr = 0;
 	std::string token = mLex.NextToken();
 	Instr *instr;
 	while(token != ""){
-		if(token[0] == '.'){// this is a Directive
-			if(pPass == 1) AssembleDirective(token);
-			else mLex.SkipRestOfLine();
+		if(token[0] == '.')
+		{// this is a Directive
+			if(pPass == 1) {
+				AssembleDirective(token);
+			}
+			else{
+				mLex.SkipRestOfLine();
+			}
 
-		}else if (token[0] == '$'){// this is a Variable
-			if(pPass == 1) AssembleVariable(token);
-			else mLex.SkipRestOfLine();
+		}else if (token[0] == '$'){
+			// this is a Variable
+			if(pPass == 1){
+				AssembleVariable(token);
+			}
+			else{
+				mLex.SkipRestOfLine();
+			}
 
-		}else if (token[0] == '@'){// this is a label
+		}else if (token[0] == '@'){
+			// this is a label
 			if(pPass == 1) {
 				AssembleLabel(token);
 				mLex.SkipRestOfLine();
@@ -140,10 +153,13 @@ void Assembler::Assemble(UInt const pPass){
 				mTextSeg.AddInstr(instr);
 			}
 			mCurrAddr++;
-		}else {// this is an instruction
-			if(pPass == 1) mLex.SkipRestOfLine();
-			else {
-				instr = AssembleInstr(mLex.NextToken(), token);
+		}else {
+			// this is an instruction
+			if(pPass == 1) {
+				mLex.SkipRestOfLine();
+			}
+			else{
+				instr = AssembleInstr(token, "");
 				mTextSeg.AddInstr(instr);
 			}
 			mCurrAddr++;
@@ -388,7 +404,11 @@ void Assembler::WriteBinary
     (
     )
 {
-	// todo  Assembler::WriteBinary
+	// create a Binary class
+	Binary bin;
+
+	// write the segments to the binary
+	bin.Write(mBinFname, mDataSeg, mTextSeg);
 }
 
 //==============================================================================================================

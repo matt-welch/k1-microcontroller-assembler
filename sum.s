@@ -7,9 +7,9 @@
 ;---------------------------------------------------------------------------------------------------
 
 .DATA 512
-$sum        0                   ; Stores the sum
-$i          0                   ; Loop index variable
-$n          3                   ; Sum of the first n positive integer.
+$sum        190                 ; Stores the sum
+$i          190                 ; Loop index variable
+$n          190                 ; Sum of the first n positive integer.
 
 ;---------------------------------------------------------------------------------------------------
 ; Defines a text (code) segment. The text segment is located at memory address 102410 = 00400h.
