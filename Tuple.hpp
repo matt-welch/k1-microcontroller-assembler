@@ -11,6 +11,7 @@
 //
 // AUTHOR INFORMATION
 // Kevin R. Burger [KRB]
+// James Matthew Welch [JMW]
 //   
 // Mailing Address:
 // Computer Science & Engineering
@@ -20,10 +21,13 @@
 //
 // Email: burgerk@asu
 // Web:   http://kevin.floorsoup.com
+// Email: matt.welch@asu.edu
+// Web:   https://bitbucket.org/mwelch/k1-microcontroller-assembler
 //
 // MODIFICATION HISTORY:
 // -------------------------------------------------------------------------------------------------------------
 // 21 Nov 2011 [KRB] Initial revision.
+// 06 Dec 2011 [JMW] Submission for grading
 //**************************************************************************************************************
 #ifndef __TUPLE_HPP__
 #define __TUPLE_HPP__
