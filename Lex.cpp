@@ -65,13 +65,18 @@ std::string Lex::NextToken(){
 	std::string token;
 	do{
 		mFin >> token; // reads next token from the file
-		if(!mFin){return "";}// true if stream has not failed, false if fail
+		if(!mFin)
+		{// true if stream has not failed, false if fail
+			return "";
+		}
 		comment = false;
-		if(token[0] == ';'){// Lex just read a comment, throw it away
+		if(token[0] == ';'){
+			// Lex just read a comment, throw it away
 			SkipRestOfLine();
 			comment = true;
 		}
 	}while(comment); // if comment found, keep parsing
+
 	return token;
 }
 

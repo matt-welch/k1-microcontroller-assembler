@@ -51,9 +51,12 @@ Variable::Variable(
 // pVariable.mString as the parameter, to initialize mAddress to pVariable.mAddress, and to initialize
 // mInitValue to pVariable.mInitValue. The body of the constructor is empty.
 //--------------------------------------------------------------------------------------------------------------
-// todo Variable(Variable) copy ctor, uses Variable::Copy()
 Variable::Variable(Variable const& pVariable)
-        {}
+		:
+		Operand(pVariable.mString),
+		mAddress(pVariable.mAddress),
+		mInitValue(pVariable.mInitValue)
+{}
 
 //--------------------------------------------------------------------------------------------------------------
 // Destructor. In this class, it is simply an empty function.
@@ -63,10 +66,7 @@ Variable::~Variable(){}
 //--------------------------------------------------------------------------------------------------------------
 // operator=. Hint: look at the other source code files to see how this is done.
 //--------------------------------------------------------------------------------------------------------------
-Variable& Variable::operator=
-		(
-		Variable const& pVariable
-		)
+Variable& Variable::operator=(Variable const& pVariable)
 {
 	if(this != &pVariable) Copy(pVariable);
 	return *this;
@@ -104,7 +104,7 @@ void Variable::SetAddress(Address const pAddress){
 //--------------------------------------------------------------------------------------------------------------
 // SetInitValue(). Mutator function for the mInitValue data member.
 //--------------------------------------------------------------------------------------------------------------
-void SetInitValue(Int32 const pInitValue){
+void Variable::SetInitValue(Int32 const pInitValue){
 	mInitValue = pInitValue;
 }
 

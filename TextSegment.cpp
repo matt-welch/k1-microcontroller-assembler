@@ -105,19 +105,38 @@ void TextSegment::Dump
 // Dynamically allocate 'contents' as Byte *.  -- Will be deallocated in Binary::Write().
 // Define a VectorIter<Instr> object named 'it' to iterate over the mInstrs Vector.
 // While it.HasNext() Do
-//     Instr instr <- it.GetNext()
+//	   Instr instr <- it.GetNext()
 //     Word encoding <- instr.GetEncoding()
 //     memcpy(&contents[offset], reinterpret_cast<Byte *>(&encoding), 4)  -- memcpy() is sleazy.
 //     offset <- offset + 4
 // End While
 // Return contents
 //--------------------------------------------------------------------------------------------------------------
-//TODO TextSegment::GetContents()
-
 Byte *TextSegment::GetContents(){
+	// UInt offset <- 0
+	UInt offset = 0;
 
+	// Dynamically allocate 'contents' as Byte *.  -- Will be deallocated in Binary::Write().
+	Byte *contents = new Byte[this-> mInstrs.GetSize() * 4];
+
+	// Define a VectorIter<Instr> object named 'it' to iterate over the mInstrs Vector.
+	VectorIter<Instr> it(mInstrs);
+
+	while(it.HasNext()){
+		//Instr instr <- it.GetNext()
+		Instr instr = it.GetNext();
+		//Word encoding <- instr.GetEncoding()
+		Word encoding = instr.GetEncoding();
+		//memcpy(&contents[offset], reinterpret_cast<Byte *>(&encoding), 4)  -- memcpy() is sleazy.
+		memcpy(&contents[offset], reinterpret_cast<Byte *>(&encoding), 4);
+		//offset <- offset + 4
+		offset = offset + 4;
+	}
+	return contents;
 }
 
+
+// GetLabel
 Label TextSegment::GetLabel
     (
     std::string const& pName
@@ -136,8 +155,9 @@ Label TextSegment::GetLabel
 //
 // Hint: See DataSegment::GetSize().
 //--------------------------------------------------------------------------------------------------------------
-UInt32 TextSegment::GetSize() const{
-	return (1 + 4 + 4 + (4 * mInstrs.GetSize()) );
+UInt32 TextSegment::GetSize() const
+{
+	return (1 + 4 + 4 + (4 * mInstrs.GetSize() ) );
 }
 
 //==============================================================================================================

@@ -50,7 +50,7 @@ Binary::~Binary
 //
 // PSEUDOCODE:
 // Define bout to be an object of the class std::ofstream.
-// Open bout passing parameters (pbinFname.c_str(), std::ios_base::binary)
+// Open bout passing parameters (pBinFname.c_str(), std::ios_base::binary)
 // Write "K1BIN" to bout.
 // initPC <- pTextSeg.GetAddress()
 // Write initPC to bout.
@@ -87,7 +87,75 @@ void Binary::Write
     TextSegment&       pTextSeg
     )
 {
-    // todo Binary::Write()
+	// Open bout passing parameters (pbinFname.c_str(), std::ios_base::binary)
+	std::ofstream bout;
+	bout.open(pBinFname.c_str(), std::ios_base::binary);
+
+	// Write "K1BIN" to bout.
+	bout.write("K1BIN", 5);
+
+	// initPC <- pTextSeg.GetAddress()
+	Address initPC = pTextSeg.GetAddress();
+
+	// Write initPC to bout.
+	bout.write(reinterpret_cast<char *> (&initPC), sizeof(Address));
+
+	// Write seven 0 bytes to bout.
+	char zeros[7] = {0};
+	bout.write(zeros,7);
+
+	// Write 0 byte (.DATA segment) to bout.
+	char zero = 0;
+	bout.write(&zero,1);
+
+	// size <- pDataSeg.GetSize()
+	UInt32 size = pDataSeg.GetSize();
+
+	// Write size as four bytes to bout.
+	bout.write(reinterpret_cast<char *> (&size), 4);
+
+	// addr <- pDataSeg.GetAddress()
+	Address addr = pDataSeg.GetAddress();
+
+	// Write addr as four bytes to bout.
+	bout.write(reinterpret_cast<char *> (&addr), 4);
+
+	// contents <- pDataSeg.GetContents()
+	Byte *contents = pDataSeg.GetContents();
+
+	// Write contents to bout.
+	bout.write(reinterpret_cast<char *> (contents), size-9);// 9 = 4+4+1
+
+	// Delete contents (this dynamically allocated array was allocated in GetContents()).
+	delete contents;
+
+	// Write 1 byte (.TEXT segment) to bout.
+	char one = 1;
+	bout.write(&one,1);
+
+	// size <- pTextSeg.GetSize()
+	size = pTextSeg.GetSize();
+
+	// Write size as four bytes to bout.
+	bout.write(reinterpret_cast<char *> (&size), 4);
+
+	// addr <- pTextSeg.GetAddress()
+	addr = pTextSeg.GetAddress();
+
+	// Write addr as four bytes to bout.
+	bout.write(reinterpret_cast<char *> (&addr), 4);
+
+	// contents <- pTextSeg.GetContents()
+	contents = pTextSeg.GetContents();
+
+	// Write contents to bout.
+	bout.write(reinterpret_cast<char *> (contents), size-9);// 9 = 4+4+1
+
+	// Delete contents (this dynamically allocated array was allocated in GetContents()).
+	delete contents;
+
+	// Close bout.
+	bout.close();
 }
 
 //==============================================================================================================

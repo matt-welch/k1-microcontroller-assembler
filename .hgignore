@@ -7,4 +7,4 @@ syntax: glob
 .cproject
 .project
 NOTES.txt
-
+sum
